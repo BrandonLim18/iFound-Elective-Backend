@@ -8,12 +8,27 @@ exports.registerUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-  const db = req.app.locals.db;
+  try {
+    console.log("Login attempt:", req.body);
 
-  const { email, password } = req.body;
-  const user = await db.collection("users").findOne({ email, password });
+    const db = req.app.locals.db;
+    const { email, password } = req.body;
 
-  if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    // Make sure email/password are trimmed
+    const user = await db.collection("users").findOne({ 
+      email: email.trim(), 
+      password: password.trim() 
+    });
 
-  res.json({ message: "Login successful", user });
+    if (!user) {
+      console.log("Invalid login attempt for", email);
+      return res.status(200).json({ success: false, message: "Invalid credentials" });
+    }
+
+    console.log("Login successful for", email);
+    res.status(200).json({ success: true, message: "Login successful", user });
+  } catch (e) {
+    console.error("Login error:", e);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 };
