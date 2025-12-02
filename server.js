@@ -18,6 +18,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/posts", require("./routes/posts"));
 app.use("/api/claims", require("./routes/claims"));
+app.use("/api/chat", require("./routes/chat"));
 
 connectDB().then((db) => {
   app.locals.db = db;
@@ -26,4 +27,5 @@ connectDB().then((db) => {
   app.listen(process.env.PORT || 3000, '0.0.0.0', () =>
     console.log(`Server running on port ${process.env.PORT || 3000}`)
   );
+  
 });
