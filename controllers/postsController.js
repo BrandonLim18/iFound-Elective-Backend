@@ -32,9 +32,18 @@ exports.createPost = async (req, res) => {
 
 exports.getPosts = async (req, res) => {
   const db = req.app.locals.db;
-  // Sort by _id descending (newest first)
-  const posts = await db.collection("posts").find().sort({ _id: -1 }).toArray();
-  res.json(posts);
+  try {
+    //  ADD THE FILTER { status: 'active' }
+    const posts = await db.collection("posts")
+        .find({ status: "active" }) 
+        .sort({ _id: -1 }) 
+        .toArray();
+
+    res.json(posts);
+  } catch (e) {
+    console.error("Error getting posts:", e);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 exports.updatePost = async (req, res) => {

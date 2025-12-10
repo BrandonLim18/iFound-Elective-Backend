@@ -1,9 +1,13 @@
+const { ObjectId } = require("mongodb");
+
 exports.registerUser = async (req, res) => {
   const db = req.app.locals.db;
-
   const user = req.body;
-  await db.collection("users").insertOne(user);
 
+  // Add default points if not present
+  if (!user.points) user.points = 0;
+
+  await db.collection("users").insertOne(user);
   res.json({ message: "User registered" });
 };
 
@@ -14,7 +18,6 @@ exports.loginUser = async (req, res) => {
     const db = req.app.locals.db;
     const { email, password } = req.body;
 
-    // Make sure email/password are trimmed
     const user = await db.collection("users").findOne({ 
       email: email.trim(), 
       password: password.trim() 
@@ -30,5 +33,23 @@ exports.loginUser = async (req, res) => {
   } catch (e) {
     console.error("Login error:", e);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+}; 
+
+exports.getLeaderboard = async (req, res) => {
+  const db = req.app.locals.db;
+  
+  try {
+    const users = await db.collection("users")
+      .find()
+      .project({ firstName: 1, lastName: 1, points: 1, profileImageUrl: 1 }) 
+      .sort({ points: -1 })
+      .limit(20)
+      .toArray();
+
+    res.json(users);
+  } catch (e) {
+    console.error("Leaderboard Error:", e);
+    res.status(500).json({ message: "Server error" });
   }
 };
